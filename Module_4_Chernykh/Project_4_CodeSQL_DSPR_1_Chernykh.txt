@@ -1,0 +1,63 @@
+select 
+    f.flight_id, -- id рейса
+    f.arrival_airport, -- аэропорт куда совершаются рейсы
+    f.actual_departure, -- даты отправления
+    count(bp.seat_no) occupancy, -- фактическое количество пассажиров
+    m.model, -- название модели самолета
+    ((count(bp.seat_no)*1.0/m.mest)*100) perc_occ, -- процент заполняемости самолета. Важный показатель в окупаемости рейсов
+    am.vyr total_amount_flight,
+    (am.vyr*1.0/count(bp.seat_no)) mid_cost_ticket, -- средняя стоимость выручки с человека, можно принять за стоимость билета
+    dist.distance,
+    case when m.model = 'Boeing 737-300' then (25*1.0*count(bp.seat_no)*dist.distance/1000)*46 else (22*1.0*count(bp.seat_no)*dist.distance/1000)*46 end fuel_cost,
+    /*расход топлива для Boeing 737-300 составляет 25 г/пасс.-км, а для Sukhoi SuperJet - 22 г/пасс.-км. Стоимость топлива на текущую дату 46 руб.кг */
+    am.vyr-(case when m.model = 'Boeing 737-300' then (25*1.0*count(bp.seat_no)*dist.distance/1000)*46 else (22*1.0*count(bp.seat_no)*dist.distance/1000)*46 end)
+    -(case when f.arrival_airport = 'SVO' then (count(bp.seat_no)*1.0*(185+190)) else (count(bp.seat_no)*1.0*(244+190)) end) profit
+    /* В формулу также включены расходы на одного пассажира за обслуживание в аэропортах отправления и назначения суммарно: 
+    в AAQ - 185 руб.чел.; в SVO - 190 руб.чел.; в EGO - 244 руб.чел. */
+FROM 
+    dst_project.flights f
+        join dst_project.boarding_passes bp on f.flight_id=bp.flight_id
+        /* Далее определяем реальную заполнояемость самолетов */
+        join 
+        (
+        select
+            a.aircraft_code,
+            a.model,
+            count(s.seat_no) mest
+        from
+            dst_project.aircrafts a
+                join dst_project.seats s on a.aircraft_code=s.aircraft_code
+        group by a.model, a.aircraft_code
+        ) m on m.aircraft_code=f.aircraft_code
+        /* посчитаем выручку на каждый рейс*/
+        join
+        (
+        select
+            t.flight_id,
+             sum(t.amount) vyr
+        from
+            dst_project.ticket_flights t
+        group by t.flight_id
+        ) am on am.flight_id=f.flight_id
+        /* Посчитаем расстояние между аэропортами по земной поверхности. Для расчетов принимаем за константу координаты Анапы 45 и 37.35. 
+        Будем использовать для расчетов расхода топлива и его стоимости*/
+        join 
+        (
+        select
+        ap.airport_code,
+        3956 * 2 * ASIN(
+             SQRT( POWER(SIN((45 - abs(ap.Latitude)) * pi()/180 / 2), 2) 
+                 + COS(37.35 * pi()/180 ) * COS(abs(ap.Latitude) * pi()/180)  
+                 * POWER(SIN((37.35 - ap.Longitude) * pi()/180 / 2), 2) )) 
+             distance
+        from
+            dst_project.airports ap
+        group by ap.airport_code
+        ) dist on f.arrival_airport=dist.airport_code
+/* Далее ограничение данное в исходном задании */
+WHERE departure_airport = 'AAQ'
+  AND (date_trunc('month', scheduled_departure) in ('2017-01-01','2017-02-01', '2017-12-01'))
+  AND status not in ('Cancelled')
+group by
+    f.flight_id, m.model, m.mest, f.arrival_airport, am.vyr, dist.distance, f.actual_departure
+order by 11
