@@ -13,3 +13,5 @@ Module_3_Chernykh - Проект 3. О вкусной и здоровой пищ
 Module_4_Chernykh - Проект 4. Авиарейсы без потерь.
 
 Module_5_Chernykh - Проект 5. Банковский_скоринг
+
+Module_6_Chernykh - Проект 6. Выбираем авто выгодно (Project_6_car_price_predict-final.ipynb и ParsingToCSV_ToGit_main.ipynb)
