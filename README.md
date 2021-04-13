@@ -15,3 +15,5 @@ Module_4_Chernykh - Проект 4. Авиарейсы без потерь.
 Module_5_Chernykh - Проект 5. Банковский_скоринг
 
 Module_6_Chernykh - Проект 6. Выбираем авто выгодно (Project_6_car_price_predict-final.ipynb и ParsingToCSV_ToGit_main.ipynb)
+
+Module_7_Chernykh - Проект 7. Ford vs Ferrari: определяем модель авто по фото  (fordvsferrari-chernykh_Chernykh.ipynb)
