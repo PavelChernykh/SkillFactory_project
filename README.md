@@ -19,3 +19,5 @@ Module_6_Chernykh - Проект 6. Выбираем авто выгодно (Pr
 Module_7_Chernykh - Проект 7. Ford vs Ferrari: определяем модель авто по фото  (fordvsferrari-chernykh_Chernykh.ipynb)
 
 Unit9_Module7_ML_Server - Юнит9. Модуль 7. Чем занимается ML-инженер  18. Итоговое задание
+
+Module_8_Chernykh - Проект 8. Возьмёте Бэтмобиль? (Он же: Юнит 9. Профориентация в Data Science  Проект 7. Возьмёте Бэтмобиль? )
